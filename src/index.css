@@ -1,0 +1,115 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #ff1a88;
+  --color-background-light: #f8f5f7;
+  --color-background-dark: #0b0b0b;
+  --color-accent-gold: #D4AF37;
+
+  --font-display: "Space Grotesk", sans-serif;
+
+  --radius-DEFAULT: 0.5rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.5rem;
+  --radius-2xl: 2rem;
+  --radius-full: 9999px;
+}
+
+@layer base {
+  html {
+    font-family: var(--font-display);
+  }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  a {
+    text-decoration: none;
+  }
+  button {
+    border: none;
+    background: none;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  * {
+    box-sizing: border-box;
+  }
+}
+
+@layer components {
+  .glass-panel {
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .glass-panel-warm {
+    background: rgba(58, 39, 48, 0.4);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .glass-panel-dark {
+    background: rgba(35, 15, 25, 0.7);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .fuchsia-glow:hover {
+    box-shadow: 0 0 20px rgba(255, 26, 136, 0.6);
+  }
+
+  .product-card {
+    transition: transform 0.5s ease, box-shadow 0.5s ease;
+  }
+
+  .product-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 20px 40px rgba(255, 26, 136, 0.15);
+  }
+
+  .gold-shimmer {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .gold-shimmer::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(45deg, transparent, rgba(212, 175, 55, 0.2), transparent);
+    transform: rotate(45deg);
+    pointer-events: none;
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #3a2730;
+    border-radius: 10px;
+  }
+}
