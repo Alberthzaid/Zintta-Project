@@ -1,58 +1,36 @@
 # ZINTTA · PRD
 
 ## Problema original
-"Analiza Zintta-project" → modificar UI + construir dashboard admin orientado a la base de datos.
+"Analiza Zintta-project" → modificar UI + construir dashboard admin orientado a la base de datos + conectar el catálogo público a Supabase.
 
 ## Stack
 - React 18 + TS + Vite + Tailwind v4 + React Router 7
 - Supabase (PostgreSQL + Auth) vía `@supabase/supabase-js`
-- Sin backend Python (server.py stub mínimo solo para satisfacer supervisor)
+- Stub FastAPI mínimo (no se usa funcionalmente)
 
-## Cambios entregados (sesión 1)
+## Cambios entregados
 
-### UI pública
-- Navbar: links → "Catálogo", "Categorías", "Nosotros", "Contáctanos"
-- Hero title → "Prendas de alta gama y exclusivas"
-- CTA button → "Cotizar artículo"
+### Sesión 1
+- UI pública: links del navbar, hero title "Prendas de alta gama y exclusivas", CTA "Cotizar artículo"
+- Dashboard admin completo en `/dashboard-admin` (Auth Supabase + 6 páginas CRUD)
+- SQL completo en `/app/supabase/schema.sql` (tablas, generated columns, triggers, RLS)
 
-### Dashboard admin `/dashboard-admin`
-- Login Supabase (email/password) con AuthContext + ProtectedRoute
-- AdminLayout con sidebar (Resumen, Categorías, Tallas, Productos, Historial)
-- AdminHome: 4 métricas (categorías, tallas, productos, variantes) con count exact
-- CRUD completo:
-  - Categorías
-  - Tallas
-  - Productos (con filtro por categoría y búsqueda)
-  - Variantes (anidado /productos/:id/variantes — talla + costos + precios + utilidades calculadas)
-  - Historial de precios (vista global + modal per-variant)
-- Toggle activo/inactivo en productos y variantes
-- Cálculo en vivo de wholesale_profit y retail_profit en el formulario
+### Sesión 2
+- **ProductCatalog conectado a Supabase**: consume `products` activos + sus variantes; filtros dinámicos derivados de categories; estados loading/error/empty
+- **ProductDetailPage conectado a Supabase**: carga producto por ID con `categories` + `product_variants` + `sizes`; tallas reales reemplazan las hardcoded; precio dinámico por talla seleccionada; tabla de precios por talla con retail + mayorista
+- **WhatsApp helper centralizado** (`lib/whatsapp.ts`): usa `VITE_WHATSAPP_NUMBER`; reemplazado en WhatsAppFab (FAB se oculta si no está configurado), QuoteModal (mensaje completo con producto/color/talla/precio) y ProductCard (botón por producto)
+- **Schema extendido**: `image_url` y `badge` añadidos a `products` (con `ADD COLUMN IF NOT EXISTS` para migración segura)
+- **Admin ProductsPage**: nuevos inputs para `image_url` y `badge`
 
-### Backend
-- `supabase/schema.sql` listo para pegar en SQL Editor:
-  - 5 tablas (categories, sizes, products, product_variants, price_history)
-  - Generated columns (wholesale_profit, retail_profit)
-  - Triggers (updated_at, price_history automático)
-  - Índices, FKs, UNIQUE constraints
-  - RLS: SELECT público al catálogo, mutaciones solo `authenticated`
-  - Seed: 3 categorías, 8 tallas, 1 producto + 1 variante
-
-## Pendiente (usuario)
-1. Crear proyecto Supabase + correr `supabase/schema.sql`
-2. Habilitar Auth Email + crear usuario admin
-3. Llenar `frontend/.env` con `VITE_SUPABASE_URL` y `VITE_SUPABASE_ANON_KEY`
-4. Reiniciar frontend (`sudo supervisorctl restart frontend`)
+## Estado actual
+- TS compila limpio · ESLint 0 issues · Build 145 KB gzipped ✓
+- Routes verificadas con screenshots (catalog vacío + product error renderean correctamente sin Supabase)
+- Listo para que el usuario llene `frontend/.env` con `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` y `VITE_WHATSAPP_NUMBER`
 
 ## Backlog
-- Conectar el catálogo público a Supabase (hoy es hardcoded en `ProductCatalog.tsx`)
-- Reemplazar imágenes de `lh3.googleusercontent.com/aida-public/*` (URLs efímeras)
-- Reemplazar `wa.me/yournumber` con `VITE_WHATSAPP_NUMBER`
-- Subir el diseño del configurador a Supabase Storage y enviar el link por WhatsApp
-- Code splitting (`React.lazy`) para reducir bundle (hoy 506 KB / 147 KB gzipped)
-- Mockup AI del diseño con Gemini Nano Banana (wow factor)
-- Tests con Vitest
-
-## Métricas técnicas (sesión 1)
-- Bundle: 506 KB (147 KB gzipped) ✓
-- Lint: 0 issues
-- TS: compila limpio
+- Subir el diseño del configurador a Supabase Storage y enviar el link en el WhatsApp
+- Mockup AI del diseño con Gemini Nano Banana (wow factor para conversión)
+- Code splitting con React.lazy
+- Reemplazar imágenes `lh3.googleusercontent.com/aida-public/*` (siguen en ProductGallery como fallback de la sesión 1)
+- Tests con Vitest + RTL
+- SEO meta tags (`og:image`, `twitter:card`, etc.)

@@ -26,6 +26,8 @@ export type Product = {
   category_id: number
   name: string
   description: string | null
+  image_url: string | null
+  badge: string | null
   active: boolean
   created_at: string
   updated_at: string
@@ -96,6 +98,8 @@ export interface Database {
           category_id: number
           name: string
           description?: string | null
+          image_url?: string | null
+          badge?: string | null
           active?: boolean
           created_at?: string
           updated_at?: string
@@ -105,6 +109,8 @@ export interface Database {
           category_id?: number
           name?: string
           description?: string | null
+          image_url?: string | null
+          badge?: string | null
           active?: boolean
           created_at?: string
           updated_at?: string

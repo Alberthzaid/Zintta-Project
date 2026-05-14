@@ -25,6 +25,8 @@ export default function ProductsPage() {
     category_id: '',
     name: '',
     description: '',
+    image_url: '',
+    badge: '',
     active: true,
   })
   const [saving, setSaving] = useState(false)
@@ -62,6 +64,8 @@ export default function ProductsPage() {
       category_id: p ? String(p.category_id) : categories[0] ? String(categories[0].id) : '',
       name: p?.name ?? '',
       description: p?.description ?? '',
+      image_url: p?.image_url ?? '',
+      badge: p?.badge ?? '',
       active: p?.active ?? true,
     })
     setOpen(true)
@@ -341,6 +345,26 @@ export default function ProductsPage() {
               placeholder="Polo básico para hombre"
             />
           </Field>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <Field label="URL de imagen" hint="Pega un link público (Unsplash, Cloudinary, etc.).">
+              <TextInput
+                data-testid="product-image-input"
+                type="url"
+                value={form.image_url}
+                onChange={(e) => setForm({ ...form, image_url: e.target.value })}
+                placeholder="https://…"
+              />
+            </Field>
+            <Field label="Badge" hint="Etiqueta opcional en la card (Bestseller, Premium…).">
+              <TextInput
+                data-testid="product-badge-input"
+                maxLength={50}
+                value={form.badge}
+                onChange={(e) => setForm({ ...form, badge: e.target.value })}
+                placeholder="Bestseller"
+              />
+            </Field>
+          </div>
           <label className="flex items-center gap-3 cursor-pointer select-none">
             <input
               data-testid="product-active-input"

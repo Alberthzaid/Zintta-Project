@@ -23,6 +23,8 @@ CREATE TABLE IF NOT EXISTS public.products (
     category_id BIGINT NOT NULL,
     name        VARCHAR(200) NOT NULL,
     description TEXT,
+    image_url   TEXT,
+    badge       VARCHAR(50),
     active      BOOLEAN NOT NULL DEFAULT TRUE,
     created_at  TIMESTAMP DEFAULT NOW(),
     updated_at  TIMESTAMP DEFAULT NOW(),
@@ -32,6 +34,10 @@ CREATE TABLE IF NOT EXISTS public.products (
 
     CONSTRAINT uq_products_name UNIQUE(name)
 );
+
+-- Migración segura para proyectos ya creados antes de añadir estas columnas:
+ALTER TABLE public.products ADD COLUMN IF NOT EXISTS image_url TEXT;
+ALTER TABLE public.products ADD COLUMN IF NOT EXISTS badge VARCHAR(50);
 
 CREATE TABLE IF NOT EXISTS public.product_variants (
     id                   BIGSERIAL PRIMARY KEY,
@@ -151,8 +157,10 @@ INSERT INTO public.sizes(code, description) VALUES
 ('3XL',   'Extra Large 3')
 ON CONFLICT (code) DO NOTHING;
 
-INSERT INTO public.products(category_id, name, description)
-SELECT c.id, 'POLO HOMBRE BASICO', 'Polo básico para hombre'
+INSERT INTO public.products(category_id, name, description, image_url, badge)
+SELECT c.id, 'POLO HOMBRE BASICO', 'Polo básico para hombre',
+       'https://images.unsplash.com/photo-1618354691373-d851c5c3a990?w=800&q=80',
+       'Bestseller'
 FROM public.categories c WHERE c.name = 'POLOS'
 ON CONFLICT (name) DO NOTHING;
 

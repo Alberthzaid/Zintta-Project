@@ -107,6 +107,8 @@ export const ProductsAPI = {
     category_id: number
     name: string
     description?: string | null
+    image_url?: string | null
+    badge?: string | null
     active?: boolean
   }): Promise<Product> {
     const { data, error } = await supabase
@@ -123,6 +125,8 @@ export const ProductsAPI = {
       category_id?: number
       name?: string
       description?: string | null
+      image_url?: string | null
+      badge?: string | null
       active?: boolean
     }
   ): Promise<Product> {
@@ -141,6 +145,119 @@ export const ProductsAPI = {
   },
   async toggleActive(id: number, active: boolean): Promise<Product> {
     return this.update(id, { active })
+  },
+}
+
+/* ===================== PUBLIC CATALOG ===================== */
+export type CatalogProduct = ProductWithCategory & {
+  minRetailPrice: number | null
+  minWholesalePrice: number | null
+  availableSizes: string[]
+}
+
+export type CatalogProductDetail = CatalogProduct & {
+  variants: Array<{
+    id: number
+    size_id: number
+    size_code: string
+    size_description: string | null
+    retail_price: number
+    wholesale_price: number
+    active: boolean
+  }>
+}
+
+export const PublicCatalogAPI = {
+  /** Returns only active products with their min retail price (across active variants). */
+  async listActive(): Promise<CatalogProduct[]> {
+    const { data, error } = await supabase
+      .from('products')
+      .select(
+        `*,
+         categories ( id, name ),
+         product_variants ( retail_price, wholesale_price, active, sizes ( code ) )`
+      )
+      .eq('active', true)
+      .order('created_at', { ascending: false })
+    if (error) throw error
+    const rows = (data ?? []) as unknown as Array<
+      ProductWithCategory & {
+        product_variants: Array<{
+          retail_price: number
+          wholesale_price: number
+          active: boolean
+          sizes: { code: string } | null
+        }>
+      }
+    >
+    return rows.map((p) => {
+      const activeVariants = p.product_variants.filter((v) => v.active)
+      const retails = activeVariants
+        .map((v) => Number(v.retail_price))
+        .filter((n) => Number.isFinite(n) && n > 0)
+      const wholesales = activeVariants
+        .map((v) => Number(v.wholesale_price))
+        .filter((n) => Number.isFinite(n) && n > 0)
+      return {
+        ...p,
+        minRetailPrice: retails.length ? Math.min(...retails) : null,
+        minWholesalePrice: wholesales.length ? Math.min(...wholesales) : null,
+        availableSizes: activeVariants
+          .map((v) => v.sizes?.code)
+          .filter((s): s is string => Boolean(s)),
+      }
+    })
+  },
+
+  async getById(id: number): Promise<CatalogProductDetail | null> {
+    const { data, error } = await supabase
+      .from('products')
+      .select(
+        `*,
+         categories ( id, name ),
+         product_variants (
+           id, size_id, retail_price, wholesale_price, active,
+           sizes ( id, code, description )
+         )`
+      )
+      .eq('id', id)
+      .maybeSingle()
+    if (error) throw error
+    if (!data) return null
+    const row = data as unknown as ProductWithCategory & {
+      product_variants: Array<{
+        id: number
+        size_id: number
+        retail_price: number
+        wholesale_price: number
+        active: boolean
+        sizes: { id: number; code: string; description: string | null } | null
+      }>
+    }
+    const activeVariants = row.product_variants.filter((v) => v.active)
+    const retails = activeVariants
+      .map((v) => Number(v.retail_price))
+      .filter((n) => Number.isFinite(n) && n > 0)
+    const wholesales = activeVariants
+      .map((v) => Number(v.wholesale_price))
+      .filter((n) => Number.isFinite(n) && n > 0)
+    return {
+      ...row,
+      minRetailPrice: retails.length ? Math.min(...retails) : null,
+      minWholesalePrice: wholesales.length ? Math.min(...wholesales) : null,
+      availableSizes: activeVariants
+        .map((v) => v.sizes?.code)
+        .filter((s): s is string => Boolean(s)),
+      variants: row.product_variants.map((v) => ({
+        id: v.id,
+        size_id: v.size_id,
+        size_code: v.sizes?.code ?? `#${v.size_id}`,
+        size_description: v.sizes?.description ?? null,
+        retail_price: Number(v.retail_price),
+        wholesale_price: Number(v.wholesale_price),
+        active: v.active,
+      })),
+    }
   },
 }
 

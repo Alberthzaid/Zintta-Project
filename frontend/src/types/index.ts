@@ -6,7 +6,7 @@ export interface Product {
   badge?: string
   image: string
   colors: string[]
-  category: 'packaging' | 'editorial' | 'marketing' | 'lujo'
+  category: string
 }
 
 export type PrintLocation = 'FRONT' | 'BACK' | 'SLEEVE'
@@ -17,7 +17,8 @@ export type ProductColor = {
   tailwindClass: string
 }
 
-export type ProductSize = 'S' | 'M' | 'L' | 'XL' | '2XL'
+// Free-form so sizes from the DB (S-M, L-XL, 10-12, 2XL, …) all fit.
+export type ProductSize = string
 
 export interface OrderConfig {
   productId: string
