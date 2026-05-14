@@ -69,11 +69,12 @@ export default function HeroSection() {
           </span>
 
           <h1
+            data-testid="hero-title"
             className="hero-title text-5xl md:text-7xl font-bold text-white leading-[1.1] tracking-tight"
             style={{ opacity: 0 }}
           >
-            Impresión de{' '}
-            <span className="text-[#ff1a88] italic">Alta Gama</span> para Marcas Exclusivas
+            Prendas de{' '}
+            <span className="text-[#ff1a88] italic">alta gama</span> y exclusivas
           </h1>
 
           <p

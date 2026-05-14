@@ -18,10 +18,10 @@ export default function Navbar() {
           </button>
 
           <div className="hidden md:flex items-center gap-8 text-sm font-medium text-white/70">
-            <a href="#catalogo" className="hover:text-[#ff1a88] transition-colors">Catálogo</a>
-            <a href="#materiales" className="hover:text-[#ff1a88] transition-colors">Materiales</a>
-            <a href="#nosotros" className="hover:text-[#ff1a88] transition-colors">Nosotros</a>
-            <a href="#soporte" className="hover:text-[#ff1a88] transition-colors">Soporte</a>
+            <a href="#catalogo" data-testid="nav-link-catalogo" className="hover:text-[#ff1a88] transition-colors">Catálogo</a>
+            <a href="#categorias" data-testid="nav-link-categorias" className="hover:text-[#ff1a88] transition-colors">Categorías</a>
+            <a href="#nosotros" data-testid="nav-link-nosotros" className="hover:text-[#ff1a88] transition-colors">Nosotros</a>
+            <a href="#contactanos" data-testid="nav-link-contactanos" className="hover:text-[#ff1a88] transition-colors">Contáctanos</a>
           </div>
         </div>
 
@@ -40,9 +40,12 @@ export default function Navbar() {
             />
           </div>
 
-          <button className="bg-[#ff1a88] hover:bg-[#ff1a88]/90 text-white px-6 py-2.5 rounded-full text-sm font-bold transition-all fuchsia-glow flex items-center gap-2">
+          <button
+            data-testid="nav-cotizar-articulo-btn"
+            className="bg-[#ff1a88] hover:bg-[#ff1a88]/90 text-white px-6 py-2.5 rounded-full text-sm font-bold transition-all fuchsia-glow flex items-center gap-2"
+          >
             <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>request_quote</span>
-            Cotizar Proyecto
+            Cotizar artículo
           </button>
         </div>
       </div>
