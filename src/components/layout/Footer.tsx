@@ -1,17 +1,5 @@
-import { getWhatsAppContactUrl } from '../../lib/whatsapp'
 
 export default function Footer() {
-  const contactUrl = getWhatsAppContactUrl()
-  const companyLinks: { label: string; href: string; external?: boolean }[] = [
-    { label: 'Sobre Nosotros', href: '/#nosotros' },
-    { label: 'Portafolio', href: '/catalogo' },
-    { label: 'Carreras', href: '#' },
-    {
-      label: 'Contacto',
-      href: contactUrl ?? '#contactanos',
-      external: Boolean(contactUrl),
-    },
-  ]
 
   return (
     <footer className="bg-[#050505] border-t border-white/5 py-20 px-6">
