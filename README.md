@@ -7,32 +7,43 @@ Landing premium + **panel administrativo** del catálogo, conectado a **Supabase
 
 ---
 
-## 🚀 Puesta en marcha (3 pasos)
+## 🚀 Puesta en marcha (5 minutos)
 
-### 1. Crear el proyecto en Supabase
+### Paso 1 — Crear el proyecto en Supabase
 
-1. Entra a [supabase.com/dashboard](https://supabase.com/dashboard) y crea un nuevo proyecto.
+1. Entra a [supabase.com/dashboard](https://supabase.com/dashboard) y crea un proyecto nuevo.
 2. En el menú lateral abre **SQL Editor → New query**.
-3. Copia el contenido de [`supabase/schema.sql`](./supabase/schema.sql) y ejecútalo.
-   Esto crea las tablas, índices, triggers (`updated_at` y `price_history` automático),
-   políticas RLS y datos de ejemplo.
+3. Copia el contenido completo de [`supabase/schema.sql`](./supabase/schema.sql) y ejecútalo.
 
-### 2. Configurar autenticación
+   Esto crea:
+   - 5 tablas (`categories`, `sizes`, `products`, `product_variants`, `price_history`)
+   - Índices, foreign keys y unique constraints
+   - Generated columns (`wholesale_profit`, `retail_profit`)
+   - Triggers automáticos (`updated_at`, `price_history` con log de cada cambio de precio)
+   - Políticas RLS (SELECT público al catálogo, escrituras solo `authenticated`)
+   - Seed: 3 categorías, 8 tallas, 1 producto + 1 variante
 
-1. **Authentication → Providers → Email**: activa "Email". Si quieres entrar sin verificar
-   el correo, desactiva "Confirm email".
-2. **Authentication → Users → Add user → Create new user**: crea tu usuario admin
+> ⚠️ El script es idempotente (`CREATE … IF NOT EXISTS`, `ON CONFLICT DO NOTHING`, `ADD COLUMN IF NOT EXISTS`). Puedes re-ejecutarlo sin perder datos si añadimos columnas en el futuro.
+
+### Paso 2 — Configurar autenticación
+
+1. **Authentication → Providers → Email**: activa "Email".
+2. Si quieres entrar sin verificar el correo, desactiva "Confirm email".
+3. **Authentication → Users → Add user → Create new user**: crea tu admin
    (`email` + `password`). Marca **Auto Confirm User**.
 
-### 3. Conectar el frontend
+### Paso 3 — Conectar el frontend
 
-1. En Supabase: **Settings → API**. Copia `Project URL` y `anon public` API key.
+1. En Supabase: **Settings → API**. Copia:
+   - `Project URL`
+   - `anon public` API key (⚠️ NO uses `service_role` en el frontend)
+
 2. Edita [`frontend/.env`](./frontend/.env):
 
    ```env
-   VITE_SUPABASE_URL=https://TU_PROJECT_REF.supabase.co
-   VITE_SUPABASE_ANON_KEY=eyJhbGciOi...   # anon public key (NO uses service_role)
-   VITE_WHATSAPP_NUMBER=                  # opcional, ej: 573001234567
+   VITE_SUPABASE_URL=https://TU_REF.supabase.co
+   VITE_SUPABASE_ANON_KEY=eyJhbGciOi...
+   VITE_WHATSAPP_NUMBER=573001234567   # opcional, código de país sin signos
    ```
 
 3. Reinicia el frontend:
@@ -41,7 +52,22 @@ Landing premium + **panel administrativo** del catálogo, conectado a **Supabase
    sudo supervisorctl restart frontend
    ```
 
-4. Entra a `/dashboard-admin/login` y autentícate con el usuario que creaste.
+4. Abre [`/dashboard-admin/login`](/dashboard-admin/login) y entra con tu usuario admin.
+
+### Paso 4 — Crear productos desde el admin
+
+1. En el panel ve a **Productos → Nuevo producto**.
+2. Completa:
+   - **Categoría** (selecciona una existente)
+   - **Nombre** (único, hasta 200 caracteres)
+   - **Descripción** (opcional)
+   - **URL de imagen** — pega un link público (Unsplash, Cloudinary, S3, etc.)
+   - **Badge** — texto corto que aparecerá como pill en la card (`Bestseller`, `Premium`, `Nuevo`…)
+   - **Activo** — si está marcado, aparece en el catálogo público
+3. Guarda. El producto aparece inmediatamente en `/` (catálogo público).
+4. Entra al producto → **Variantes** para añadir tallas con sus costos y precios.
+
+> 💡 Mientras escribes en el formulario verás una **vista previa** en vivo de cómo se verá la card.
 
 ---
 
@@ -52,30 +78,33 @@ Landing premium + **panel administrativo** del catálogo, conectado a **Supabase
 ├── supabase/
 │   └── schema.sql            ← Script SQL completo (copia y pega en Supabase)
 ├── frontend/
-│   ├── .env                  ← Variables VITE_SUPABASE_*
+│   ├── .env                  ← Variables VITE_SUPABASE_* + VITE_WHATSAPP_NUMBER
 │   └── src/
 │       ├── lib/
 │       │   ├── supabase.ts          ← Cliente Supabase tipado
 │       │   ├── database.types.ts    ← Tipos TS de las tablas
-│       │   └── api.ts               ← Capa de datos (CategoriesAPI, SizesAPI, …)
+│       │   ├── api.ts               ← CategoriesAPI, SizesAPI, ProductsAPI,
+│       │   │                          VariantsAPI, PriceHistoryAPI, MetricsAPI,
+│       │   │                          PublicCatalogAPI
+│       │   └── whatsapp.ts          ← Helper para construir wa.me URLs
 │       ├── context/AuthContext.tsx  ← Sesión de Supabase Auth
 │       ├── components/
-│       │   ├── admin/               ← AdminLayout, ProtectedRoute, Modal, Button …
+│       │   ├── admin/               ← AdminLayout, ProtectedRoute, Modal, Button…
 │       │   ├── layout/              ← Navbar (público), Footer, WhatsAppFab
-│       │   ├── home/                ← Hero, Catalog, BrandTrust, CTA
-│       │   └── product/             ← ProductGallery, ConfigPanel, …
+│       │   ├── home/                ← Hero, Catalog, BrandTrust, CTA, ProductCard
+│       │   └── product/             ← ProductGallery, ConfigPanel, QuoteModal, Upload
 │       └── pages/
-│           ├── HomePage.tsx
-│           ├── ProductDetailPage.tsx
+│           ├── HomePage.tsx                ← Catálogo público (Supabase)
+│           ├── ProductDetailPage.tsx       ← Detalle por ID (Supabase)
 │           └── admin/
 │               ├── AdminLogin.tsx
-│               ├── AdminHome.tsx          ← Métricas
+│               ├── AdminHome.tsx           ← Métricas
 │               ├── CategoriesPage.tsx
 │               ├── SizesPage.tsx
-│               ├── ProductsPage.tsx
-│               ├── VariantsPage.tsx       ← /productos/:id/variantes
-│               └── HistoryPage.tsx        ← Auditoría de precios
-└── backend/                  ← Stub mínimo (no se usa, Supabase reemplaza al backend)
+│               ├── ProductsPage.tsx        ← CRUD + thumb + badge + preview
+│               ├── VariantsPage.tsx        ← /productos/:id/variantes
+│               └── HistoryPage.tsx         ← Auditoría de precios
+└── backend/                  ← Stub mínimo (Supabase reemplaza al backend)
 ```
 
 ---
@@ -84,29 +113,30 @@ Landing premium + **panel administrativo** del catálogo, conectado a **Supabase
 
 | Ruta | Descripción | Auth |
 |---|---|---|
-| `/` | Landing pública | — |
-| `/product/:id` | Configurador de producto | — |
+| `/` | Catálogo público (productos activos) | — |
+| `/product/:id` | Detalle del producto con tallas reales | — |
 | `/dashboard-admin/login` | Login del admin | — |
 | `/dashboard-admin` | Resumen + métricas | ✅ |
 | `/dashboard-admin/categorias` | CRUD de categorías | ✅ |
 | `/dashboard-admin/tallas` | CRUD de tallas | ✅ |
-| `/dashboard-admin/productos` | CRUD de productos | ✅ |
+| `/dashboard-admin/productos` | CRUD de productos (con `image_url` y `badge`) | ✅ |
 | `/dashboard-admin/productos/:id/variantes` | CRUD de variantes + historial | ✅ |
 | `/dashboard-admin/historial` | Auditoría global de precios | ✅ |
 
 ---
 
-## 🗃️ Modelo de datos (resumen)
+## 🗃️ Modelo de datos
 
 - **categories** · maestro de grupos (POLOS, BUZOS, CAMISETAS).
 - **sizes** · maestro de tallas (S-M, L-XL, 2XL, 10-12, …).
 - **products** · pertenece a una `category`. Único por nombre.
+  - `image_url TEXT` y `badge VARCHAR(50)` para presentar la card.
 - **product_variants** · `(product_id, size_id)` único. Cada variante guarda:
   - `production_cost`, `manufacturing_cost`
   - `wholesale_price`, `retail_price`
   - **`wholesale_profit`** = `wholesale_price − production_cost` *(GENERATED ALWAYS AS STORED)*
   - **`retail_profit`** = `retail_price − production_cost` *(GENERATED ALWAYS AS STORED)*
-- **price_history** · alimentada automáticamente por un **trigger** cada vez que cambia
+- **price_history** · alimentada automáticamente por un trigger cada vez que cambia
   `wholesale_price` o `retail_price` de una variante.
 
 ---
@@ -115,29 +145,8 @@ Landing premium + **panel administrativo** del catálogo, conectado a **Supabase
 
 Todas las tablas tienen Row Level Security activado:
 - `categories`, `sizes`, `products`, `product_variants` → **SELECT público**
-  (el catálogo de la web pública puede consultar sin auth).
-- Todas las escrituras (`INSERT/UPDATE/DELETE`) requieren un usuario autenticado
-  (`auth.role() = 'authenticated'`).
+- Todas las escrituras requieren un usuario autenticado (`authenticated`).
 - `price_history` solo se lee con auth.
-
-> Si más adelante quieres rol específico de "admin", crea una tabla `profiles`
-> con columna `role` y endurece las policies con `auth.uid()`.
-
----
-
-## 🛠️ Comandos útiles
-
-```bash
-# Reiniciar servicios (después de cambiar .env o instalar deps)
-sudo supervisorctl restart frontend
-sudo supervisorctl restart backend
-
-# Logs
-tail -f /var/log/supervisor/frontend.out.log
-
-# Tipos TS desde Supabase (opcional, requiere la CLI)
-npx supabase gen types typescript --project-id YOUR_PROJECT_REF > frontend/src/lib/database.types.ts
-```
 
 ---
 
@@ -146,8 +155,9 @@ npx supabase gen types typescript --project-id YOUR_PROJECT_REF > frontend/src/l
 - [ ] Ejecuté `supabase/schema.sql` en el SQL Editor.
 - [ ] Habilité el provider Email en Auth.
 - [ ] Creé un usuario admin con Auto Confirm.
-- [ ] Llené `frontend/.env` con URL + anon key.
-- [ ] Reinicié `frontend` con supervisor.
+- [ ] Llené `frontend/.env` con URL + anon key (+ opcionalmente número de WhatsApp).
+- [ ] Reinicié `frontend` con `sudo supervisorctl restart frontend`.
 - [ ] Pude iniciar sesión en `/dashboard-admin/login`.
 - [ ] Vi mis categorías sembradas (POLOS / BUZOS / CAMISETAS).
+- [ ] Creé un producto con `image_url` y `badge` y lo vi en el catálogo público.
 - [ ] Edité un precio de variante y apareció el registro en *Historial*.

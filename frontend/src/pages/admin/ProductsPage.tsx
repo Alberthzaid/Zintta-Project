@@ -83,6 +83,8 @@ export default function ProductsPage() {
         category_id: Number(form.category_id),
         name: form.name.trim(),
         description: form.description.trim() || null,
+        image_url: form.image_url.trim() || null,
+        badge: form.badge.trim() || null,
         active: form.active,
       }
       if (editing) {
@@ -210,6 +212,7 @@ export default function ProductsPage() {
             <thead>
               <tr className="text-left text-[11px] font-bold uppercase tracking-widest text-white/40 border-b border-[#3a2730]">
                 <th className="px-6 py-4 w-20">ID</th>
+                <th className="px-6 py-4 w-20">Imagen</th>
                 <th className="px-6 py-4">Producto</th>
                 <th className="px-6 py-4">Categoría</th>
                 <th className="px-6 py-4">Estado</th>
@@ -225,9 +228,44 @@ export default function ProductsPage() {
                 >
                   <td className="px-6 py-4 text-white/40 font-mono text-sm">#{p.id}</td>
                   <td className="px-6 py-4">
-                    <p className="font-bold">{p.name}</p>
+                    <div
+                      data-testid={`product-thumb-${p.id}`}
+                      className="size-12 rounded-lg overflow-hidden bg-white/5 border border-white/10 flex items-center justify-center"
+                    >
+                      {p.image_url ? (
+                        <img
+                          src={p.image_url}
+                          alt={p.name}
+                          loading="lazy"
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            ;(e.currentTarget as HTMLImageElement).style.display = 'none'
+                          }}
+                        />
+                      ) : (
+                        <span
+                          className="material-symbols-outlined text-white/20"
+                          style={{ fontSize: '20px' }}
+                        >
+                          image
+                        </span>
+                      )}
+                    </div>
+                  </td>
+                  <td className="px-6 py-4">
+                    <div className="flex items-center gap-2 mb-1">
+                      <p className="font-bold">{p.name}</p>
+                      {p.badge && (
+                        <span
+                          data-testid={`product-badge-${p.id}`}
+                          className="px-2 py-0.5 rounded-full bg-[#ff1a88]/15 border border-[#ff1a88]/30 text-[#ff1a88] text-[10px] font-bold uppercase tracking-widest"
+                        >
+                          {p.badge}
+                        </span>
+                      )}
+                    </div>
                     {p.description && (
-                      <p className="text-xs text-white/40 mt-1 line-clamp-1">
+                      <p className="text-xs text-white/40 line-clamp-1">
                         {p.description}
                       </p>
                     )}
@@ -364,6 +402,57 @@ export default function ProductsPage() {
                 placeholder="Bestseller"
               />
             </Field>
+          </div>
+
+          {/* Live preview of the card */}
+          <div className="rounded-xl border border-[#3a2730] bg-black/40 p-4">
+            <p className="text-[10px] uppercase tracking-widest text-white/40 mb-3">
+              Vista previa
+            </p>
+            <div className="flex items-center gap-4">
+              <div
+                data-testid="product-image-preview"
+                className="size-24 rounded-lg overflow-hidden bg-white/5 border border-white/10 flex items-center justify-center shrink-0"
+              >
+                {form.image_url ? (
+                  <img
+                    src={form.image_url}
+                    alt={form.name || 'Preview'}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      const el = e.currentTarget as HTMLImageElement
+                      el.style.display = 'none'
+                      el.parentElement?.classList.add('preview-broken')
+                    }}
+                    onLoad={(e) => {
+                      const el = e.currentTarget as HTMLImageElement
+                      el.style.display = 'block'
+                      el.parentElement?.classList.remove('preview-broken')
+                    }}
+                  />
+                ) : (
+                  <span
+                    className="material-symbols-outlined text-white/20"
+                    style={{ fontSize: '32px' }}
+                  >
+                    image
+                  </span>
+                )}
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 mb-1">
+                  <p className="font-bold truncate">{form.name || 'Nombre del producto'}</p>
+                  {form.badge && (
+                    <span className="px-2 py-0.5 rounded-full bg-[#ff1a88]/15 border border-[#ff1a88]/30 text-[#ff1a88] text-[10px] font-bold uppercase tracking-widest">
+                      {form.badge}
+                    </span>
+                  )}
+                </div>
+                <p className="text-xs text-white/50 line-clamp-2">
+                  {form.description || 'La descripción aparecerá aquí.'}
+                </p>
+              </div>
+            </div>
           </div>
           <label className="flex items-center gap-3 cursor-pointer select-none">
             <input

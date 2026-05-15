@@ -6,31 +6,40 @@
 ## Stack
 - React 18 + TS + Vite + Tailwind v4 + React Router 7
 - Supabase (PostgreSQL + Auth) vía `@supabase/supabase-js`
-- Stub FastAPI mínimo (no se usa funcionalmente)
+- Stub FastAPI mínimo (no funcional)
 
 ## Cambios entregados
 
 ### Sesión 1
-- UI pública: links del navbar, hero title "Prendas de alta gama y exclusivas", CTA "Cotizar artículo"
-- Dashboard admin completo en `/dashboard-admin` (Auth Supabase + 6 páginas CRUD)
-- SQL completo en `/app/supabase/schema.sql` (tablas, generated columns, triggers, RLS)
+- UI pública: links navbar, hero "Prendas de alta gama y exclusivas", CTA "Cotizar artículo"
+- Dashboard admin completo en `/dashboard-admin` (Auth Supabase + 6 páginas)
+- Schema SQL completo
 
 ### Sesión 2
-- **ProductCatalog conectado a Supabase**: consume `products` activos + sus variantes; filtros dinámicos derivados de categories; estados loading/error/empty
-- **ProductDetailPage conectado a Supabase**: carga producto por ID con `categories` + `product_variants` + `sizes`; tallas reales reemplazan las hardcoded; precio dinámico por talla seleccionada; tabla de precios por talla con retail + mayorista
-- **WhatsApp helper centralizado** (`lib/whatsapp.ts`): usa `VITE_WHATSAPP_NUMBER`; reemplazado en WhatsAppFab (FAB se oculta si no está configurado), QuoteModal (mensaje completo con producto/color/talla/precio) y ProductCard (botón por producto)
-- **Schema extendido**: `image_url` y `badge` añadidos a `products` (con `ADD COLUMN IF NOT EXISTS` para migración segura)
-- **Admin ProductsPage**: nuevos inputs para `image_url` y `badge`
+- ProductCatalog conectado a Supabase (productos activos + variantes)
+- ProductDetailPage conectado a Supabase (tallas reales, precios dinámicos)
+- Helper WhatsApp con `VITE_WHATSAPP_NUMBER`
+- Schema extendido: `image_url` + `badge` en products
+
+### Sesión 3 (este pase)
+- 🐛 BUG FIX crítico: el `onSubmit` de ProductsPage NO enviaba `image_url` ni `badge` al backend (campos del form se perdían al guardar). Ahora payload completo.
+- Admin ProductsPage muestra **thumbnail** + **badge chip** en cada fila de la tabla
+- Formulario de producto tiene **vista previa en vivo** de la card (imagen + nombre + badge + descripción)
+- `.env` limpio (sin comentarios per platform rules), `.env.example` creado
+- README rebuilt con paso-a-paso de 4 pasos para que el usuario configure Supabase manualmente
 
 ## Estado actual
-- TS compila limpio · ESLint 0 issues · Build 145 KB gzipped ✓
-- Routes verificadas con screenshots (catalog vacío + product error renderean correctamente sin Supabase)
-- Listo para que el usuario llene `frontend/.env` con `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` y `VITE_WHATSAPP_NUMBER`
+- TS compila ✓ · ESLint 0 issues ✓ · Build verificado ✓
+- Frontend respondiendo 200 en `/` y `/dashboard-admin/login`
+- Todo listo para que el usuario:
+  1. Pegue `supabase/schema.sql` en SQL Editor
+  2. Cree usuario admin en Authentication
+  3. Llene URL + anon key + WhatsApp en `frontend/.env`
+  4. Reinicie frontend
 
 ## Backlog
-- Subir el diseño del configurador a Supabase Storage y enviar el link en el WhatsApp
-- Mockup AI del diseño con Gemini Nano Banana (wow factor para conversión)
+- Subida del diseño cliente a Supabase Storage
+- Mockup AI con Gemini Nano Banana (wow factor)
 - Code splitting con React.lazy
-- Reemplazar imágenes `lh3.googleusercontent.com/aida-public/*` (siguen en ProductGallery como fallback de la sesión 1)
 - Tests con Vitest + RTL
-- SEO meta tags (`og:image`, `twitter:card`, etc.)
+- SEO meta tags y favicon ZINTTA
