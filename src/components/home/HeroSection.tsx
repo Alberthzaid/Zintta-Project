@@ -1,12 +1,17 @@
 import { useEffect } from 'react'
+import { Link } from 'react-router-dom'
 import anime from 'animejs'
 import { useParallax } from '../../hooks/useParallax'
+import { getWhatsAppUrl } from '../../lib/whatsapp'
 
 const HERO_BG =
   'https://lh3.googleusercontent.com/aida-public/AB6AXuCEWGNShjLtVepDNqYyxTMWw8KsKRVVdU48PAjnCe-K2EXSvZ4Qy3mscekOzhb00ddkLXoLh-BVZ9Gz9FSQnufiossXKfs2ZnjJ1e819bteWk41xjGu9HcOXJgDXCK1JZizIAWarVMDZv_McdZvQZxovufzDsbzdZ6RpPq4tv5UOHz3ZwEzhGy6n94HgJ7bREmd0g-RKmGQ3vMKAQHxvTw5KE_jEhhGYu8Q0AvnVeodgWtQ-lMOZDdWv2fXOJT3uVtHoWcSxO4WfDsy'
 
 export default function HeroSection() {
   const bgRef = useParallax(0.35)
+  const quoteUrl = getWhatsAppUrl(
+    'Hola ZINTTA, me gustaría cotizar un artículo personalizado. ¿Me pueden ayudar?'
+  )
 
   useEffect(() => {
     const revealHero = () => {
@@ -105,15 +110,41 @@ export default function HeroSection() {
             className="hero-cta flex flex-col sm:flex-row gap-4 w-full sm:w-auto"
             style={{ opacity: 0 }}
           >
-            <button className="bg-[#ff1a88] text-white px-10 py-5 rounded-xl text-lg font-bold transition-all fuchsia-glow flex items-center justify-center gap-3 group">
-              Cotizar mi impresión
-              <span className="material-symbols-outlined group-hover:translate-x-1 transition-transform" style={{ fontSize: '20px' }}>
-                arrow_forward
-              </span>
-            </button>
-            <button className="bg-white/5 hover:bg-white/10 text-white border border-white/10 px-10 py-5 rounded-xl text-lg font-bold transition-all flex items-center justify-center gap-3">
-              Ver Muestrario
-            </button>
+            {quoteUrl ? (
+              <a
+                href={quoteUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="bg-[#ff1a88] text-white px-10 py-5 rounded-xl text-lg font-bold transition-all fuchsia-glow flex items-center justify-center gap-3 group"
+              >
+                Cotizar artículo
+                <span
+                  className="material-symbols-outlined group-hover:translate-x-1 transition-transform"
+                  style={{ fontSize: '20px' }}
+                >
+                  arrow_forward
+                </span>
+              </a>
+            ) : (
+              <Link
+                to="/catalogo"
+                className="bg-[#ff1a88] text-white px-10 py-5 rounded-xl text-lg font-bold transition-all fuchsia-glow flex items-center justify-center gap-3 group"
+              >
+                Cotizar artículo
+                <span
+                  className="material-symbols-outlined group-hover:translate-x-1 transition-transform"
+                  style={{ fontSize: '20px' }}
+                >
+                  arrow_forward
+                </span>
+              </Link>
+            )}
+            <Link
+              to="/catalogo"
+              className="bg-white/5 hover:bg-white/10 text-white border border-white/10 px-10 py-5 rounded-xl text-lg font-bold transition-all flex items-center justify-center gap-3"
+            >
+              Ver catálogo
+            </Link>
           </div>
         </div>
       </div>

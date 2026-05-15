@@ -74,7 +74,7 @@ export default function ProductCard({ product }: Props) {
           )}
         </div>
 
-        <div className="grid grid-cols-2 gap-3 pt-4 mt-auto">
+        <div className="flex flex-col gap-3 pt-4 mt-auto">
           <button
             data-testid={`view-product-${product.id}`}
             onClick={() => navigate(`/product/${product.id}`)}
